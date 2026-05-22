@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Sophos Mobile",
+    "slug": "sophos-mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "sophosmobile",
+    "userInterfaceStyle": "automatic",
+    "platforms": ["ios", "android", "web"],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0f4c81"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    }
+  }
+}
