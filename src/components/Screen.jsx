@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView, ScrollView, StyleSheet, View } from "react-native";
 import { colors } from "@/theme/colors";
@@ -7,9 +6,6 @@ import { spacing } from "@/theme/spacing";
 export const Screen = ({
   children,
   scroll = true,
-}: {
-  children: ReactNode;
-  scroll?: boolean;
 }) => {
   const Container = scroll ? ScrollView : View;
 

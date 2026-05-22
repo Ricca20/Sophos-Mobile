@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, ViewStyle } from "react-native";
+import { Pressable, StyleSheet, Text } from "react-native";
 import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 
@@ -7,11 +7,6 @@ export const AppButton = ({
   onPress,
   variant = "primary",
   style,
-}: {
-  title: string;
-  onPress?: () => void;
-  variant?: "primary" | "secondary" | "ghost";
-  style?: ViewStyle;
 }) => {
   return (
     <Pressable

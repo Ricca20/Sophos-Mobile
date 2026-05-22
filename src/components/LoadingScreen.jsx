@@ -1,7 +1,7 @@
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { colors } from "@/theme/colors";
 
-export const LoadingScreen = ({ label = "Loading Sophos Mobile..." }: { label?: string }) => (
+export const LoadingScreen = ({ label = "Loading Sophos Mobile..." }) => (
   <View style={styles.container}>
     <ActivityIndicator size="large" color={colors.primary} />
     <Text style={styles.text}>{label}</Text>

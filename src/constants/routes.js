@@ -12,8 +12,8 @@ export const routes = {
     profile: "/profile",
   },
   detail: {
-    doctor: (id: string) => `/doctor/${id}`,
-    appointment: (id: string) => `/appointment/${id}`,
-    meeting: (roomId: string) => `/meeting/${roomId}`,
+    doctor: (id) => `/doctor/${id}`,
+    appointment: (id) => `/appointment/${id}`,
+    meeting: (roomId) => `/meeting/${roomId}`,
   },
-} as const;
+};

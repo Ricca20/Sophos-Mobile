@@ -12,8 +12,9 @@ import { spacing } from "@/theme/spacing";
 
 export default function DoctorDetailScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const doctorQuery = useQuery({ queryKey: ["doctor", id], queryFn: () => doctorService.getById(id), enabled: Boolean(id) });
+  const { id } = useLocalSearchParams();
+  const doctorId = Array.isArray(id) ? id[0] : id;
+  const doctorQuery = useQuery({ queryKey: ["doctor", doctorId], queryFn: () => doctorService.getById(doctorId), enabled: Boolean(doctorId) });
 
   return (
     <Screen>
@@ -26,7 +27,7 @@ export default function DoctorDetailScreen() {
         <AppCard>
           <View style={styles.block}>
             <Text style={styles.name}>{doctorQuery.data?.fullName?.en ?? doctorQuery.data?.firstName?.en ?? "Doctor"}</Text>
-            <Text style={styles.meta}>ID: {doctorQuery.data?._id ?? id}</Text>
+            <Text style={styles.meta}>ID: {doctorQuery.data?._id ?? doctorId}</Text>
             <Text style={styles.meta}>{doctorQuery.data?.specialtyIds?.map((item) => item.name?.en).filter(Boolean).join(", ") || "Specialist"}</Text>
             <AppButton
               title="Book appointment"

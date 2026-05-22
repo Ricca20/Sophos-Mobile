@@ -1,29 +1,16 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import type { ReactNode } from "react";
-import type { AuthResponse, AuthUser } from "@/types/auth";
 import { sessionStorage } from "@/utils/storage";
 import { authService } from "@/features/auth/authService";
 
-type AuthContextValue = {
-  user: AuthUser | null;
-  accessToken: string | null;
-  isBootstrapping: boolean;
-  isAuthenticated: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
-  signOut: () => Promise<void>;
-  hydrateSession: () => Promise<void>;
-};
+const AuthContext = createContext(undefined);
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [accessToken, setAccessToken] = useState(null);
   const [isBootstrapping, setIsBootstrapping] = useState(true);
 
   const hydrateSession = async () => {
-    const storedUser = await sessionStorage.getUser<AuthUser>();
+    const storedUser = await sessionStorage.getUser();
     const storedToken = await sessionStorage.getAccessToken();
 
     setUser(storedUser);
@@ -35,7 +22,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     void hydrateSession();
   }, []);
 
-  const applyAuthResponse = async (response: AuthResponse) => {
+  const applyAuthResponse = async (response) => {
     setUser(response.user);
     setAccessToken(response.accessToken);
 
@@ -44,12 +31,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await sessionStorage.saveRefreshToken(response.refreshToken ?? null);
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email, password) => {
     const response = await authService.signIn(email, password);
     await applyAuthResponse(response);
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email, password) => {
     const response = await authService.signUp(email, password);
     await applyAuthResponse(response);
   };
@@ -61,7 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setAccessToken(null);
   };
 
-  const value = useMemo<AuthContextValue>(
+  const value = useMemo(
     () => ({
       user,
       accessToken,

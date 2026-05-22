@@ -3,9 +3,9 @@ import { env } from "@/utils/env";
 import { sessionStorage } from "@/utils/storage";
 
 let isRefreshing = false;
-let waitQueue: Array<(token: string | null) => void> = [];
+let waitQueue = [];
 
-const notifySubscribers = (token: string | null) => {
+const notifySubscribers = (token) => {
   waitQueue.forEach((resolve) => resolve(token));
   waitQueue = [];
 };

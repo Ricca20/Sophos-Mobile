@@ -11,7 +11,8 @@ import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 
 export default function MeetingScreen() {
-  const { roomId } = useLocalSearchParams<{ roomId: string }>();
+  const { roomId } = useLocalSearchParams();
+  const resolvedRoomId = Array.isArray(roomId) ? roomId[0] : roomId;
   const { user } = useAuth();
   const [isJoining, setIsJoining] = useState(false);
 
@@ -19,7 +20,7 @@ export default function MeetingScreen() {
     try {
       setIsJoining(true);
       const result = await meetingService.joinByUser({
-        roomId,
+        roomId: resolvedRoomId,
         userEmail: user?.email,
         role: user?.role,
         name: user?.name ?? user?.email,
@@ -43,7 +44,7 @@ export default function MeetingScreen() {
       <AppCard>
         <View style={styles.block}>
           <Text style={styles.label}>Room ID</Text>
-          <Text style={styles.value}>{roomId}</Text>
+          <Text style={styles.value}>{resolvedRoomId}</Text>
           <AppButton title={isJoining ? "Joining..." : "Join meeting"} onPress={handleJoin} />
         </View>
       </AppCard>

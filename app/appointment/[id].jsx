@@ -10,8 +10,9 @@ import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 
 export default function AppointmentDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const appointmentQuery = useQuery({ queryKey: ["appointment", id], queryFn: () => appointmentService.getById(id), enabled: Boolean(id) });
+  const { id } = useLocalSearchParams();
+  const appointmentId = Array.isArray(id) ? id[0] : id;
+  const appointmentQuery = useQuery({ queryKey: ["appointment", appointmentId], queryFn: () => appointmentService.getById(appointmentId), enabled: Boolean(appointmentId) });
 
   return (
     <Screen>
@@ -23,7 +24,7 @@ export default function AppointmentDetailScreen() {
       ) : (
         <AppCard>
           <View style={styles.block}>
-            <Text style={styles.title}>{appointmentQuery.data?.applicationId ?? id}</Text>
+            <Text style={styles.title}>{appointmentQuery.data?.applicationId ?? appointmentId}</Text>
             <Text style={styles.meta}>Date: {appointmentQuery.data?.date ?? "Not set"}</Text>
             <Text style={styles.meta}>Status: {appointmentQuery.data?.status ?? "Pending"}</Text>
           </View>

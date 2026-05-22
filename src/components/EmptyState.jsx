@@ -8,11 +8,6 @@ export const EmptyState = ({
   message,
   actionLabel,
   onAction,
-}: {
-  title: string;
-  message: string;
-  actionLabel?: string;
-  onAction?: () => void;
 }) => (
   <View style={styles.container}>
     <Text style={styles.title}>{title}</Text>

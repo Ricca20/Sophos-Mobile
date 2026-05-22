@@ -10,14 +10,6 @@ export const AppInput = ({
   secureTextEntry,
   keyboardType,
   autoCapitalize = "none",
-}: {
-  label: string;
-  value: string;
-  onChangeText: (value: string) => void;
-  placeholder?: string;
-  secureTextEntry?: boolean;
-  keyboardType?: "default" | "email-address" | "numeric";
-  autoCapitalize?: "none" | "sentences" | "words" | "characters";
 }) => {
   return (
     <View style={styles.container}>

@@ -4,9 +4,6 @@ import { colors } from "@/theme/colors";
 export const SectionHeader = ({
   title,
   subtitle,
-}: {
-  title: string;
-  subtitle?: string;
 }) => (
   <View style={styles.container}>
     <Text style={styles.title}>{title}</Text>

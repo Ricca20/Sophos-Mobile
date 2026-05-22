@@ -42,7 +42,7 @@ export default function HomeScreen() {
 
       <View style={styles.shortcutRow}>
         {shortcuts.map((item) => (
-          <Pressable key={item.href} style={styles.shortcutCard} onPress={() => router.push(item.href as never)}>
+          <Pressable key={item.href} style={styles.shortcutCard} onPress={() => router.push(item.href)}>
             <Text style={styles.shortcutLabel}>{item.label}</Text>
           </Pressable>
         ))}

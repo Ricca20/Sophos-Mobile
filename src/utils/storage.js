@@ -13,7 +13,7 @@ const canUseSecureStore = async () => {
   }
 };
 
-const writeToken = async (key: string, value: string | null) => {
+const writeToken = async (key, value) => {
   const secureAvailable = await canUseSecureStore();
 
   if (value) {
@@ -34,7 +34,7 @@ const writeToken = async (key: string, value: string | null) => {
   await AsyncStorage.removeItem(key);
 };
 
-const readToken = async (key: string) => {
+const readToken = async (key) => {
   const secureAvailable = await canUseSecureStore();
   if (secureAvailable) {
     return SecureStore.getItemAsync(key);
@@ -44,10 +44,10 @@ const readToken = async (key: string) => {
 };
 
 export const sessionStorage = {
-  async saveAccessToken(token: string | null) {
+  async saveAccessToken(token) {
     await writeToken(ACCESS_TOKEN_KEY, token);
   },
-  async saveRefreshToken(token: string | null) {
+  async saveRefreshToken(token) {
     await writeToken(REFRESH_TOKEN_KEY, token);
   },
   async getAccessToken() {
@@ -59,13 +59,13 @@ export const sessionStorage = {
   async saveUser(user: unknown) {
     await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
   },
-  async getUser<T>() {
+  async getUser() {
     const raw = await AsyncStorage.getItem(USER_KEY);
     if (!raw) {
       return null;
     }
 
-    return JSON.parse(raw) as T;
+    return JSON.parse(raw);
   },
   async clear() {
     await Promise.all([

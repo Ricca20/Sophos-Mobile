@@ -1,9 +1,8 @@
-import { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 
-export const AppCard = ({ children }: { children: ReactNode }) => (
+export const AppCard = ({ children }) => (
   <View style={styles.card}>{children}</View>
 );
 
