@@ -1,13 +1,36 @@
-import { Redirect } from "expo-router";
+import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Index() {
-  const { isAuthenticated, isBootstrapping } = useAuth();
+  const router = useRouter();
+  const { isBootstrapping } = useAuth();
+  const [readyToRoute, setReadyToRoute] = useState(false);
 
-  if (isBootstrapping) {
-    return <LoadingScreen />;
-  }
+  useEffect(() => {
+    if (isBootstrapping) {
+      return undefined;
+    }
 
-  return <Redirect href={isAuthenticated ? "/home" : "/sign-in"} />;
+    setReadyToRoute(false);
+    const timer = setTimeout(() => {
+      setReadyToRoute(true);
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [isBootstrapping]);
+
+  useEffect(() => {
+    if (readyToRoute) {
+      router.replace("/intro");
+    }
+  }, [readyToRoute, router]);
+
+  return (
+    <LoadingScreen
+      label="Sophos Mobile"
+      subtitle="Preparing your secure portal"
+    />
+  );
 }

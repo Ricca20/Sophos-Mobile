@@ -4,6 +4,11 @@ import { sessionStorage } from "@/utils/storage";
 
 let isRefreshing = false;
 let waitQueue = [];
+let authContext = null;
+
+export const setAuthContext = (ctx) => {
+  authContext = ctx;
+};
 
 const notifySubscribers = (token) => {
   waitQueue.forEach((resolve) => resolve(token));
@@ -73,12 +78,20 @@ api.interceptors.response.use(
         await sessionStorage.saveUser(data.user);
       }
 
+      if (authContext?.updateToken) {
+        authContext.updateToken(data.accessToken, data.refreshToken);
+      }
+
       notifySubscribers(data.accessToken);
       originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
       return api(originalRequest);
     } catch (refreshError) {
       notifySubscribers(null);
-      await sessionStorage.clear();
+      if (authContext?.signOut) {
+        await authContext.signOut();
+      } else {
+        await sessionStorage.clear();
+      }
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;

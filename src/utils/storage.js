@@ -56,7 +56,7 @@ export const sessionStorage = {
   async getRefreshToken() {
     return readToken(REFRESH_TOKEN_KEY);
   },
-  async saveUser(user: unknown) {
+  async saveUser(user) {
     await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
   },
   async getUser() {
@@ -66,6 +66,12 @@ export const sessionStorage = {
     }
 
     return JSON.parse(raw);
+  },
+  async saveLanguage(lang) {
+    await AsyncStorage.setItem("sophos_language", lang);
+  },
+  async getLanguage() {
+    return (await AsyncStorage.getItem("sophos_language")) || "en";
   },
   async clear() {
     await Promise.all([

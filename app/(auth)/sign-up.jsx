@@ -1,85 +1,841 @@
-import { useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Alert,
+  Image,
+  ImageBackground,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  ActivityIndicator,
+  ScrollView,
+} from "react-native";
 import { Link, useRouter } from "expo-router";
-import { AppButton } from "@/components/AppButton";
-import { AppInput } from "@/components/AppInput";
-import { AppCard } from "@/components/AppCard";
-import { Screen } from "@/components/Screen";
-import { SectionHeader } from "@/components/SectionHeader";
+import { StatusBar } from "expo-status-bar";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/hooks/useAuth";
 import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
+import { t } from "@/utils/i18n";
+import { PhoneInput } from "@/components/PhoneInput";
+
+// Form Input Component with Focus States
+const FormInput = ({
+  label,
+  value,
+  onChangeText,
+  placeholder,
+  secureTextEntry,
+  keyboardType,
+  leftIcon,
+  rightIcon,
+  onRightIconPress,
+  error,
+}) => {
+  const [isFocused, setIsFocused] = useState(false);
+
+  return (
+    <View style={styles.inputContainer}>
+      <Text style={[styles.inputLabel, isFocused && styles.inputLabelFocused, error && styles.inputLabelError]}>
+        {label}
+      </Text>
+      <View
+        style={[
+          styles.inputWrapper,
+          isFocused && styles.inputWrapperFocused,
+          error && styles.inputWrapperError,
+        ]}
+      >
+        {leftIcon && (
+          <Feather
+            name={leftIcon}
+            size={18}
+            color={error ? "#EF4444" : isFocused ? "#0F4C81" : "#6B7A90"}
+            style={styles.inputLeftIcon}
+            pointerEvents="none"
+          />
+        )}
+        <TextInput
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
+          placeholderTextColor="#94A3B8"
+          secureTextEntry={secureTextEntry}
+          keyboardType={keyboardType}
+          autoCapitalize="none"
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          style={[
+            styles.inputField,
+            leftIcon ? { paddingLeft: 44 } : null,
+            rightIcon ? { paddingRight: 44 } : null,
+          ]}
+        />
+        {rightIcon && (
+          <Pressable onPress={onRightIconPress} style={styles.inputRightIcon}>
+            <Feather
+              name={rightIcon}
+              size={18}
+              color={isFocused ? "#0F4C81" : "#6B7A90"}
+            />
+          </Pressable>
+        )}
+      </View>
+      {error ? <Text style={styles.inputErrorText}>{error}</Text> : null}
+    </View>
+  );
+};
+
+// Password Checklist Component
+const PasswordCriteria = ({ label, met }) => {
+  return (
+    <View style={styles.criteriaRow}>
+      <Ionicons
+        name={met ? "checkmark-circle" : "ellipse-outline"}
+        size={14}
+        color={met ? "#1E9E6A" : "#94A3B8"}
+      />
+      <Text style={[styles.criteriaText, met ? styles.criteriaTextMet : styles.criteriaTextUnmet]}>
+        {label}
+      </Text>
+    </View>
+  );
+};
 
 export default function SignUpScreen() {
   const router = useRouter();
-  const { signUp } = useAuth();
+  const { signUp, sendOtp, verifyOtpSignUp } = useAuth();
+  
+  const [lang, setLang] = useState("en");
+  const [activeTab, setActiveTab] = useState("email"); 
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Email/Password state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSubmit = async () => {
+  const scrollViewRef = useRef(null);
+
+
+  // OTP state
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpStep, setOtpStep] = useState("send"); 
+  const [otpError, setOtpError] = useState("");
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Real-time strength criteria
+  const isLenMet = password.length >= 8;
+  const isSymbolMet = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  const isNumMet = /\d/.test(password);
+  const isUpperMet = /[A-Z]/.test(password);
+  const isLowerMet = /[a-z]/.test(password);
+
+  const isPasswordStrong = isLenMet && isSymbolMet && isNumMet && isUpperMet && isLowerMet;
+
+  // Auto-scroll to reveal password requirements & bottom elements when they appear
+  useEffect(() => {
+    if (password.length > 0 && !isPasswordStrong) {
+      const timer = setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 120);
+      return () => clearTimeout(timer);
+    }
+  }, [password.length > 0 && !isPasswordStrong]);
+
+  // Reset states when changing tab
+  useEffect(() => {
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
+    setEmailError("");
+    setConfirmPasswordError("");
+    setPhoneNumber("");
+    setOtpCode("");
+    setOtpStep("send");
+    setOtpError("");
+  }, [activeTab]);
+
+  const handleEmailChange = (val) => {
+    setEmail(val);
+    if (val && !emailRegex.test(val)) {
+      setEmailError(t("signup.emailError", lang));
+    } else {
+      setEmailError("");
+    }
+  };
+
+  const handleConfirmPasswordChange = (val) => {
+    setConfirmPassword(val);
+    if (val && val !== password) {
+      setConfirmPasswordError(t("signup.passwordMismatchError", lang));
+    } else {
+      setConfirmPasswordError("");
+    }
+  };
+
+  const handleSignUp = async () => {
+    if (!emailRegex.test(email) || !isPasswordStrong || password !== confirmPassword) {
+      Alert.alert(t("signup.signupError", lang), t("signup.formError", lang));
+      return;
+    }
+    
+    setIsLoading(true);
     try {
-      setIsSubmitting(true);
-      await signUp(email.trim().toLowerCase(), password);
-      router.replace("/home");
+      await signUp(email.trim().toLowerCase(), password, lang);
+      Alert.alert(
+        "Account Created",
+        t("signup.signupSuccess", lang),
+        [{ text: "OK", onPress: () => router.replace("/sign-in") }]
+      );
     } catch (error) {
-      Alert.alert("Sign up failed", error instanceof Error ? error.message : "Unable to create your account.");
+      console.warn("Sign Up Error:", error);
+      Alert.alert(t("signup.signupError", lang), error?.response?.data?.message || error.message);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
+    }
+  };
+
+  const validatePhoneNumber = (phone) => {
+    const phoneRegex = /^\+?[0-9]{7,15}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const handleSendOtp = async () => {
+    if (!phoneNumber) {
+      setOtpError(t("signup.otp.phoneRequired", lang));
+      return;
+    }
+    if (!validatePhoneNumber(phoneNumber)) {
+      setOtpError(t("signup.otp.invalidPhone", lang));
+      return;
+    }
+    
+    setIsLoading(true);
+    setOtpError("");
+    try {
+      await sendOtp(phoneNumber);
+      Alert.alert("OTP Sent", t("signup.otp.otpSent", lang));
+      setOtpStep("verify");
+      setOtpCode("");
+    } catch (error) {
+      const errMsg = error?.response?.data?.message || t("signup.otp.sendFailed", lang);
+      setOtpError(errMsg);
+      Alert.alert("Failed", errMsg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpCode) {
+      setOtpError(t("signup.otp.otpRequired", lang));
+      return;
+    }
+    if (!/^\d{4,6}$/.test(otpCode)) {
+      setOtpError(t("signup.otp.invalidOtp", lang));
+      return;
+    }
+
+    setIsLoading(true);
+    setOtpError("");
+    try {
+      await verifyOtpSignUp(phoneNumber, otpCode, lang);
+      Alert.alert(
+        "Registration Complete", 
+        t("signup.otp.signupSuccess", lang),
+        [{ text: "OK", onPress: () => router.replace("/home") }]
+      );
+    } catch (error) {
+      const errMsg = error?.response?.data?.message || t("signup.otp.verifyFailed", lang);
+      setOtpError(errMsg);
+      Alert.alert("Failed", errMsg);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Screen>
-      <View style={styles.hero}>
-        <Text style={styles.brand}>Sophos Mobile</Text>
-        <SectionHeader
-          title="Create account"
-          subtitle="This mobile app is aligned with the Health Direct patient portal architecture."
-        />
-      </View>
+    <ImageBackground
+      source={require("../../assets/background.jpg")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <StatusBar style="light" />
+      <View style={styles.overlay} pointerEvents="none" />
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="always" keyboardDismissMode="none">
+          {/* Language Selector */}
+          <View style={styles.headerBar}>
+            <Pressable
+              onPress={() => setLang((prev) => (prev === "en" ? "ru" : "en"))}
+              style={({ pressed }) => [styles.langSelector, pressed && styles.pressedMicro]}
+            >
+              <Feather name="globe" size={15} color="#FFF" />
+              <Text style={styles.langSelectorText}>
+                {lang === "en" ? "RU" : "EN"}
+              </Text>
+            </Pressable>
+          </View>
 
-      <AppCard>
-        <View style={styles.form}>
-          <AppInput label="Email" value={email} onChangeText={setEmail} placeholder="patient@example.com" keyboardType="email-address" />
-          <AppInput label="Password" value={password} onChangeText={setPassword} placeholder="Choose a password" secureTextEntry />
-          <AppButton title={isSubmitting ? "Creating..." : "Create account"} onPress={handleSubmit} />
-        </View>
-      </AppCard>
+          <View style={styles.cardContainer}>
+            {/* Logo */}
+            <Image
+              source={require("../../assets/logo_en.png")}
+              style={styles.logo}
+              resizeMode="contain"
+            />
 
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Already have an account?</Text>
-        <Link href="/sign-in" style={styles.link}>Sign in</Link>
-      </View>
-    </Screen>
+            {/* Premium Signup Card */}
+            <View style={styles.card}>
+              {/* Tab Selector */}
+              <View style={styles.tabToggleContainer}>
+                <View style={styles.tabToggleBg}>
+                  <Pressable
+                    onPress={() => setActiveTab("email")}
+                    style={[styles.tabButton, activeTab === "email" && styles.tabButtonActive]}
+                  >
+                    <Text style={[styles.tabButtonText, activeTab === "email" && styles.tabButtonTextActive]}>
+                      {t("signup.tabs.email", lang)}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => setActiveTab("otp")}
+                    style={[styles.tabButton, activeTab === "otp" && styles.tabButtonActive]}
+                  >
+                    <Text style={[styles.tabButtonText, activeTab === "otp" && styles.tabButtonTextActive]}>
+                      {t("signup.tabs.otp", lang)}
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+
+              {/* Title & Subtitle */}
+              <Text style={styles.title}>
+                {activeTab === "email"
+                  ? t("signup.createAccount", lang)
+                  : t("signup.otp.title", lang)}
+              </Text>
+              <Text style={styles.subtitle}>
+                {activeTab === "email"
+                  ? t("signup.subtitle", lang)
+                  : t("signup.otp.subtitle", lang)}
+              </Text>
+
+              {/* Email Form */}
+              {activeTab === "email" ? (
+                <View style={styles.form}>
+                  <FormInput
+                    label={t("signup.emailLabel", lang)}
+                    value={email}
+                    onChangeText={handleEmailChange}
+                    placeholder={t("signup.emailPlaceholder", lang)}
+                    keyboardType="email-address"
+                    leftIcon="mail"
+                    error={emailError}
+                  />
+
+                  <FormInput
+                    label={t("signup.passwordLabel", lang)}
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder={t("signup.passwordPlaceholder", lang)}
+                    secureTextEntry={!showPassword}
+                    leftIcon="lock"
+                    rightIcon={showPassword ? "eye-off" : "eye"}
+                    onRightIconPress={() => setShowPassword(!showPassword)}
+                  />
+
+                  {/* Password Strength Checklist Tags */}
+                  {password.length > 0 && !isPasswordStrong && (
+                    <View style={styles.criteriaGrid}>
+                      <PasswordCriteria
+                        label={t("signup.passwordLengthError", lang)}
+                        met={isLenMet}
+                      />
+                      <PasswordCriteria
+                        label={t("signup.passwordUppercaseError", lang)}
+                        met={isUpperMet}
+                      />
+                      <PasswordCriteria
+                        label={t("signup.passwordLowercaseError", lang)}
+                        met={isLowerMet}
+                      />
+                      <PasswordCriteria
+                        label={t("signup.passwordNumberError", lang)}
+                        met={isNumMet}
+                      />
+                      <PasswordCriteria
+                        label={t("signup.passwordSymbolError", lang)}
+                        met={isSymbolMet}
+                      />
+                    </View>
+                  )}
+
+                  <FormInput
+                    label={t("signup.confirmPasswordLabel", lang)}
+                    value={confirmPassword}
+                    onChangeText={handleConfirmPasswordChange}
+                    placeholder={t("signup.confirmPasswordPlaceholder", lang)}
+                    secureTextEntry={!showConfirmPassword}
+                    leftIcon="lock"
+                    rightIcon={showConfirmPassword ? "eye-off" : "eye"}
+                    onRightIconPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                    error={confirmPasswordError}
+                  />
+
+                  {/* Submit button */}
+                  <Pressable
+                    onPress={handleSignUp}
+                    disabled={isLoading || !isPasswordStrong || password !== confirmPassword}
+                    style={({ pressed }) => [
+                      styles.primaryButton,
+                      pressed && styles.pressed,
+                      (isLoading || !isPasswordStrong || password !== confirmPassword) && styles.buttonDisabled,
+                    ]}
+                  >
+                    {isLoading ? (
+                      <ActivityIndicator size="small" color="#FFF" />
+                    ) : (
+                      <Text style={styles.primaryButtonText}>
+                        {t("signup.signUpButton", lang)}  ›
+                      </Text>
+                    )}
+                  </Pressable>
+                </View>
+              ) : (
+                /* OTP Form */
+                <View style={styles.form}>
+                  <PhoneInput
+                    label={t("signup.otp.phoneLabel", lang)}
+                    value={phoneNumber}
+                    onChangeText={(val) => {
+                      setPhoneNumber(val);
+                      if (otpError) setOtpError("");
+                    }}
+                    placeholder="Enter number"
+                    disabled={otpStep === "verify"}
+                    error={otpStep === "send" ? otpError : null}
+                  />
+
+                  {otpStep === "send" ? (
+                    <Pressable
+                      onPress={handleSendOtp}
+                      disabled={isLoading}
+                      style={({ pressed }) => [
+                        styles.primaryButton,
+                        pressed && styles.pressed,
+                        isLoading && styles.buttonDisabled,
+                      ]}
+                    >
+                      {isLoading ? (
+                        <ActivityIndicator size="small" color="#FFF" />
+                      ) : (
+                        <View style={styles.buttonWithIcon}>
+                          <Feather name="send" size={15} color="#FFF" style={styles.btnIcon} />
+                          <Text style={styles.primaryButtonText}>
+                            {t("signup.otp.sendOtp", lang)}
+                          </Text>
+                        </View>
+                      )}
+                    </Pressable>
+                  ) : (
+                    <View style={{ gap: spacing.md }}>
+                      <FormInput
+                        label={t("signup.otp.otpLabel", lang)}
+                        value={otpCode}
+                        onChangeText={(val) => {
+                          setOtpCode(val.replace(/\D/g, "").slice(0, 6));
+                          if (otpError) setOtpError("");
+                        }}
+                        placeholder={t("signup.otp.otpPlaceholder", lang)}
+                        keyboardType="number-pad"
+                        leftIcon="key"
+                        error={otpError}
+                      />
+
+                      <Pressable
+                        onPress={handleVerifyOtp}
+                        disabled={isLoading}
+                        style={({ pressed }) => [
+                          styles.primaryButton,
+                          pressed && styles.pressed,
+                          isLoading && styles.buttonDisabled,
+                        ]}
+                      >
+                        {isLoading ? (
+                          <ActivityIndicator size="small" color="#FFF" />
+                        ) : (
+                          <Text style={styles.primaryButtonText}>
+                            {t("signup.otp.register", lang)}
+                          </Text>
+                        )}
+                      </Pressable>
+
+                      {/* Action links */}
+                      <View style={styles.rowBetween}>
+                        <Pressable
+                          onPress={() => {
+                            setOtpStep("send");
+                            setOtpCode("");
+                            setOtpError("");
+                          }}
+                          style={styles.backToPhoneRow}
+                        >
+                          <Feather name="chevron-left" size={14} color="#6B7A90" />
+                          <Text style={styles.backToPhoneText}>
+                            {t("signup.otp.changeNumber", lang)}
+                          </Text>
+                        </Pressable>
+
+                        <Pressable onPress={handleSendOtp}>
+                          <Text style={styles.resendText}>
+                            {t("signup.otp.resend", lang)}
+                          </Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  )}
+                </View>
+              )}
+
+              {/* Footer */}
+              <View style={styles.footer}>
+                <Text style={styles.footerText}>
+                  {t("signup.alreadyHaveAccount", lang)}{" "}
+                </Text>
+                <Link href="/sign-in" asChild>
+                  <Pressable style={({ pressed }) => [pressed && styles.pressedMicro]}>
+                    <Text style={styles.footerLinkBold}>
+                      {t("signup.loginLink", lang)}
+                    </Text>
+                  </Pressable>
+                </Link>
+              </View>
+
+              <Pressable
+                onPress={() => router.replace("/intro")}
+                style={({ pressed }) => [styles.backToHomeBtn, pressed && styles.pressedMicro]}
+              >
+                <Text style={styles.backToHomeText}>
+                  {t("signin.backToHome", lang)}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  hero: {
-    gap: spacing.md,
+  safeArea: {
+    flex: 1,
+    backgroundColor: "transparent",
   },
-  brand: {
-    fontSize: 14,
+  background: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(16, 35, 63, 0.65)", 
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "space-between",
+    paddingBottom: 40,
+  },
+  headerBar: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    paddingHorizontal: 24,
+    paddingTop: 15,
+  },
+  langSelector: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 24,
+    borderWidth: 1.2,
+    borderColor: "rgba(255, 255, 255, 0.25)",
+    gap: 6,
+  },
+  langSelectorText: {
+    color: "#FFF",
+    fontSize: 13,
     fontWeight: "800",
-    letterSpacing: 1.2,
-    color: colors.primary,
+    letterSpacing: 0.5,
+  },
+  cardContainer: {
+    alignItems: "center",
+    paddingHorizontal: 20,
+    marginTop: 15,
+  },
+  logo: {
+    width: 150,
+    height: 70,
+    marginBottom: 20,
+  },
+  card: {
+    width: "100%",
+    maxWidth: 400,
+    backgroundColor: "rgba(255, 255, 255, 0.95)", 
+    borderRadius: 30, 
+    padding: 28,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.7)",
+    shadowColor: "#0F4C81",
+    shadowOpacity: 0.15,
+    shadowRadius: 25,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 8,
+  },
+  tabToggleContainer: {
+    alignItems: "center",
+    marginBottom: 26,
+  },
+  tabToggleBg: {
+    flexDirection: "row",
+    backgroundColor: "#E2E8F0",
+    borderRadius: 30,
+    padding: 4,
+    width: "100%",
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 26,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tabButtonActive: {
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#0F4C81",
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
+  },
+  tabButtonText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#64748B",
     textTransform: "uppercase",
+    letterSpacing: 0.3,
+  },
+  tabButtonTextActive: {
+    color: "#0F4C81",
+    fontWeight: "800",
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "900",
+    color: "#10233F",
+    textAlign: "center",
+    marginBottom: 6,
+    letterSpacing: 0.5,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#6B7A90",
+    textAlign: "center",
+    marginBottom: 28,
+    lineHeight: 20,
   },
   form: {
-    gap: spacing.md,
+    gap: 12,
   },
-  footer: {
+  inputContainer: {
+    gap: 6,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#475569",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    paddingLeft: 2,
+  },
+  inputLabelFocused: {
+    color: "#0F4C81",
+  },
+  inputLabelError: {
+    color: "#EF4444",
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+    borderRadius: 18,
+    height: 54,
+    position: "relative",
+    shadowColor: "transparent",
+  },
+  inputWrapperFocused: {
+    borderColor: "#0F4C81",
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#0F4C81",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
+  },
+  inputWrapperError: {
+    borderColor: "#EF4444",
+    backgroundColor: "#FFF5F5",
+  },
+  inputLeftIcon: {
+    position: "absolute",
+    left: 16,
+    zIndex: 1,
+  },
+  inputRightIcon: {
+    position: "absolute",
+    right: 16,
+    zIndex: 1,
+    padding: 4,
+  },
+  inputField: {
+    flex: 1,
+    height: "100%",
+    fontSize: 14,
+    color: "#10233F",
+    paddingHorizontal: 18,
+    fontWeight: "600",
+  },
+  inputErrorText: {
+    fontSize: 11,
+    color: "#EF4444",
+    fontWeight: "700",
+    marginTop: 2,
+    paddingLeft: 4,
+  },
+  criteriaGrid: {
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+    borderRadius: 18,
+    padding: 14,
+    gap: 10,
+    marginTop: 4,
+  },
+  criteriaRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    width: "100%",
+  },
+  criteriaText: {
+    fontSize: 12,
+    fontWeight: "600",
+    flex: 1, 
+    lineHeight: 16,
+  },
+  criteriaTextMet: {
+    color: "#1E9E6A",
+    fontWeight: "700",
+  },
+  criteriaTextUnmet: {
+    color: "#64748B",
+  },
+  primaryButton: {
+    backgroundColor: "#0F4C81",
+    borderRadius: 18,
+    height: 56,
+    alignItems: "center",
     justifyContent: "center",
+    marginTop: 10,
+    shadowColor: "#0F4C81",
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
+  },
+  primaryButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "900",
+    letterSpacing: 0.5,
+  },
+  buttonDisabled: {
+    backgroundColor: "#94A3B8",
+    shadowColor: "transparent",
+    elevation: 0,
+  },
+  buttonWithIcon: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  btnIcon: {
+    marginTop: 1,
+  },
+  pressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.97 }], 
+  },
+  pressedMicro: {
+    opacity: 0.75,
+    transform: [{ scale: 0.95 }],
+  },
+  backToPhoneRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingVertical: 4,
+  },
+  backToPhoneText: {
+    fontSize: 13,
+    color: "#6B7A90",
+    fontWeight: "700",
+  },
+  resendText: {
+    fontSize: 13,
+    color: "#1E9E6A",
+    fontWeight: "800",
+    paddingVertical: 4,
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 12,
   },
   footerText: {
-    color: colors.muted,
+    fontSize: 14,
+    color: "#6B7A90",
+    fontWeight: "500",
   },
-  link: {
-    color: colors.primary,
+  footerLinkBold: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#10233F",
+    textDecorationLine: "underline",
+  },
+  backToHomeBtn: {
+    alignSelf: "center",
+    marginTop: 6,
+    paddingHorizontal: 12,
+  },
+  backToHomeText: {
+    fontSize: 12,
+    color: "#94A3B8",
     fontWeight: "700",
+    letterSpacing: 0.3,
   },
 });

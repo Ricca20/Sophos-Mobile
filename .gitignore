@@ -12,3 +12,12 @@ node_modules/
 
 # OS artifacts
 .DS_Store
+
+# Environment variables — never commit these (contains API URLs, secrets)
+.env
+.env.local
+.env.*.local
+
+# Production builds
+dist/
+build/

@@ -6,11 +6,17 @@ import { AppCard } from "@/components/AppCard";
 import { SectionHeader } from "@/components/SectionHeader";
 import { EmptyState } from "@/components/EmptyState";
 import { appointmentService } from "@/features/appointments/appointmentService";
+import { useAuth } from "@/hooks/useAuth";
 import { colors } from "@/theme/colors";
 
 export default function AppointmentsScreen() {
   const router = useRouter();
-  const appointmentsQuery = useQuery({ queryKey: ["appointments"], queryFn: () => appointmentService.list() });
+  const { isAuthenticated } = useAuth();
+  const appointmentsQuery = useQuery({
+    queryKey: ["appointments"],
+    queryFn: () => appointmentService.list(),
+    enabled: isAuthenticated,
+  });
 
   return (
     <Screen>

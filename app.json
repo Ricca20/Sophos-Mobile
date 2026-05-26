@@ -4,17 +4,25 @@
     "slug": "sophos-mobile",
     "version": "0.1.0",
     "orientation": "portrait",
+    "icon": "./assets/logo_en.png",
     "scheme": "sophosmobile",
     "userInterfaceStyle": "automatic",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "experiments": {
       "typedRoutes": true
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pasovit.sophosmobile"
     },
     "android": {
+      "package": "com.pasovit.sophosmobile",
       "adaptiveIcon": {
+        "foregroundImage": "./assets/logo_en.png",
         "backgroundColor": "#0f4c81"
       }
     },
