@@ -17,11 +17,13 @@ const styles = StyleSheet.create({
       web: {
         boxShadow: "0 12px 24px rgba(10, 37, 64, 0.08)",
       },
-      default: {
+      ios: {
         shadowColor: "#0A2540",
         shadowOpacity: 0.08,
         shadowOffset: { width: 0, height: 12 },
         shadowRadius: 24,
+      },
+      android: {
         elevation: 2,
       },
     }),

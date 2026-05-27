@@ -11,7 +11,6 @@ import {
   SafeAreaView,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { useAuth } from "@/hooks/useAuth";
 import countriesData from "./countries.json";
@@ -332,11 +331,13 @@ const styles = StyleSheet.create({
       web: {
         boxShadow: "0 -8px 24px rgba(9, 13, 22, 0.15)",
       },
-      default: {
+      ios: {
         shadowColor: "#0F4C81",
         shadowOpacity: 0.12,
         shadowRadius: 16,
         shadowOffset: { width: 0, height: -8 },
+      },
+      android: {
         elevation: 8,
       },
     }),

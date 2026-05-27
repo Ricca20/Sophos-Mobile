@@ -15,7 +15,7 @@ export const getCurrentDeviceId = async () => {
       await AsyncStorage.setItem(DEVICE_ID_KEY, deviceId);
     }
     return deviceId;
-  } catch (error) {
+  } catch {
     return `mob_${Date.now()}`;
   }
 };

@@ -28,9 +28,6 @@ export default function Index() {
   }, [readyToRoute, router]);
 
   return (
-    <LoadingScreen
-      label="Sophos Mobile"
-      subtitle="Preparing your secure portal"
-    />
+    <LoadingScreen />
   );
 }

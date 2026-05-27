@@ -24,11 +24,11 @@ export const Screen = ({
       <View style={styles.outerContainer}>
         {/* Screen Content */}
         <Container
-          pointerEvents={shouldBlock ? "none" : "auto"}
           contentContainerStyle={scroll ? styles.scrollContent : undefined}
           style={[
             styles.container,
             shouldBlock && styles.containerBlocked,
+            { pointerEvents: shouldBlock ? "none" : "auto" }
           ]}
         >
           {children}
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   containerBlocked: {
-    opacity: 0.35, // Blurs/diminishes layout
+    opacity: 0.35, 
   },
   scrollContent: {
     flexGrow: 1,
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   },
   blockOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Web-matching overlay background
+    backgroundColor: "rgba(0, 0, 0, 0.5)", 
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
@@ -94,9 +94,9 @@ const styles = StyleSheet.create({
   },
   blockCard: {
     width: "90%",
-    maxWidth: 400, // Web-matching max-width
+    maxWidth: 400, 
     backgroundColor: "#FFFFFF",
-    borderRadius: 24, // High-quality rounded card matching mobile feel and web style
+    borderRadius: 24, 
     paddingVertical: 32,
     paddingHorizontal: 24,
     alignItems: "center",
@@ -104,33 +104,35 @@ const styles = StyleSheet.create({
       web: {
         boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)",
       },
-      default: {
+      ios: {
         shadowColor: "#000000",
         shadowOpacity: 0.1,
         shadowRadius: 15,
         shadowOffset: { width: 0, height: 5 },
+      },
+      android: {
         elevation: 5,
       },
     }),
   },
   blockTitle: {
     fontSize: 26,
-    fontWeight: "500", // Soft, clean weight matching the image
-    color: "#000000", // Pure black for high visibility and exact matching
+    fontWeight: "500", 
+    color: "#000000", 
     textAlign: "center",
     marginBottom: 12,
   },
   blockMessage: {
     fontSize: 16,
-    color: "#374151", // Standard neutral dark gray matching the image description
+    color: "#374151", 
     textAlign: "center",
     lineHeight: 22,
     marginBottom: 24,
     paddingHorizontal: 8,
   },
   blockButton: {
-    backgroundColor: "#007bff", // Exact vibrant blue from the web app primary/image
-    borderRadius: 6, // Clean, subtle rounding matching the button in the image
+    backgroundColor: "#007bff", 
+    borderRadius: 6, 
     paddingVertical: 12,
     paddingHorizontal: 24,
     alignItems: "center",
@@ -140,11 +142,13 @@ const styles = StyleSheet.create({
       web: {
         boxShadow: "0 4px 12px rgba(0, 123, 255, 0.2)",
       },
-      default: {
+      ios: {
         shadowColor: "#007bff",
         shadowOpacity: 0.2,
         shadowRadius: 6,
         shadowOffset: { width: 0, height: 3 },
+      },
+      android: {
         elevation: 3,
       },
     }),

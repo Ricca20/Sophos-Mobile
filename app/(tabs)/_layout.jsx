@@ -91,11 +91,13 @@ export default function TabsLayout() {
               boxShadow: "0 -8px 24px rgba(15, 76, 129, 0.08)",
               outlineStyle: "none",
             },
-            default: {
+            ios: {
               shadowColor: "#0F4C81",
               shadowOpacity: 0.08,
               shadowRadius: 16,
               shadowOffset: { width: 0, height: -4 },
+            },
+            android: {
               elevation: 8,
             },
           }),
@@ -190,11 +192,13 @@ const styles = StyleSheet.create({
       web: {
         boxShadow: "0 8px 25px rgba(13, 56, 129, 0.5)",
       },
-      default: {
+      ios: {
         shadowColor: "#0D3881",
         shadowOpacity: 0.5,
         shadowRadius: 12,
         shadowOffset: { width: 0, height: 8 },
+      },
+      android: {
         elevation: 8,
       },
     }),

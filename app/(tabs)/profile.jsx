@@ -28,71 +28,8 @@ import { spacing } from "@/theme/spacing";
 import { t } from "@/utils/i18n";
 import { useToast } from "@/context/ToastContext";
 import { env } from "@/utils/env";
+import { AppInput } from "@/components/AppInput";
 
-// Local FormInput Component
-const LocalFormInput = ({
-  label,
-  value,
-  onChangeText,
-  placeholder,
-  disabled,
-  keyboardType,
-  leftIcon,
-  error,
-  autoCapitalize = "none",
-}) => {
-  const [isFocused, setIsFocused] = useState(false);
-
-  return (
-    <View style={styles.inputContainer}>
-      <Text
-        style={[
-          styles.inputLabel,
-          isFocused && styles.inputLabelFocused,
-          error && styles.inputLabelError,
-          disabled && styles.inputLabelDisabled,
-        ]}
-      >
-        {label}
-      </Text>
-      <View
-        style={[
-          styles.inputWrapper,
-          isFocused && styles.inputWrapperFocused,
-          error && styles.inputWrapperError,
-          disabled && styles.inputWrapperDisabled,
-        ]}
-      >
-        {leftIcon && (
-          <Feather
-            name={leftIcon}
-            size={18}
-            color={error ? "#EF4444" : isFocused ? "#0F4C81" : "#6B7A90"}
-            style={styles.inputLeftIcon}
-            pointerEvents="none"
-          />
-        )}
-        <TextInput
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor="#94A3B8"
-          editable={!disabled}
-          keyboardType={keyboardType}
-          autoCapitalize={autoCapitalize}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          style={[
-            styles.inputField,
-            leftIcon ? { paddingLeft: 44 } : null,
-            disabled && styles.inputFieldDisabled,
-          ]}
-        />
-      </View>
-      {error ? <Text style={styles.inputErrorText}>{error}</Text> : null}
-    </View>
-  );
-};
 
 const CalendarInput = ({ label, value, onPress, error }) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -666,7 +603,6 @@ export default function ProfileScreen() {
         "success"
       );
     } catch (error) {
-      console.warn("Save profile error:", error);
       showToast(
         error?.response?.data?.message || error.message || t("profile.saveFailed", globalLang) || "Failed to save profile",
         "error"
@@ -714,8 +650,7 @@ export default function ProfileScreen() {
       await profileService.uploadProfilePicture(selectedUri, patientId);
       showToast("Profile picture updated successfully!", "success");
       profileQuery.refetch();
-    } catch (error) {
-      console.warn("Upload profile picture error:", error);
+    } catch {
       showToast("Failed to upload profile picture.", "error");
     } finally {
       setIsSubmitting(false);
@@ -945,7 +880,7 @@ export default function ProfileScreen() {
               <View style={styles.sectionDivider} />
 
               <View style={styles.fieldsBlock}>
-            <LocalFormInput
+            <AppInput
               label={t("profile.patientId", globalLang)}
               value={displayPatientId}
               disabled={true}
@@ -954,7 +889,7 @@ export default function ProfileScreen() {
 
             <View style={styles.gridRow}>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={`${t("profile.firstName", globalLang)} *`}
                   value={formData.firstName}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, firstName: val }))}
@@ -965,7 +900,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.middleName", globalLang)}
                   value={formData.middleName}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, middleName: val }))}
@@ -975,7 +910,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={`${t("profile.lastName", globalLang)} *`}
                   value={formData.lastName}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, lastName: val }))}
@@ -1012,7 +947,7 @@ export default function ProfileScreen() {
 
             <View style={styles.gridRow}>
               <View style={styles.gridHalf}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.email", globalLang)}
                   value={user?.email ?? formData.email}
                   disabled={true}
@@ -1085,7 +1020,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.contactPerson", globalLang)}
                   value={formData.contactPerson}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, contactPerson: val }))}
@@ -1107,7 +1042,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.maxId", globalLang)}
                   value={formData.maxId}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, maxId: val }))}
@@ -1116,7 +1051,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.telegramNickname", globalLang)}
                   value={formData.telegramNickname}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, telegramNickname: val }))}
@@ -1128,7 +1063,7 @@ export default function ProfileScreen() {
 
             <View style={styles.gridRow}>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.telegramId", globalLang)}
                   value={formData.telegramId}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, telegramId: val }))}
@@ -1137,7 +1072,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.instagram", globalLang)}
                   value={formData.instagram}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, instagram: val }))}
@@ -1146,7 +1081,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.vk", globalLang)}
                   value={formData.vk}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, vk: val }))}
@@ -1158,7 +1093,7 @@ export default function ProfileScreen() {
 
             <View style={styles.gridRow}>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.facebook", globalLang)}
                   value={formData.facebook}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, facebook: val }))}
@@ -1167,7 +1102,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.ok", globalLang)}
                   value={formData.ok}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, ok: val }))}
@@ -1226,7 +1161,7 @@ export default function ProfileScreen() {
               <View style={styles.fieldsBlock}>
             <View style={styles.gridRow}>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.cmip", globalLang)}
                   value={formData.cmip}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, cmip: val }))}
@@ -1242,7 +1177,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.cmipOrgCode", globalLang)}
                   value={formData.cmipOrgCode}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, cmipOrgCode: val }))}
@@ -1254,7 +1189,7 @@ export default function ProfileScreen() {
 
             <View style={styles.gridRow}>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.snils", globalLang)}
                   value={formData.snils}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, snils: val }))}
@@ -1263,7 +1198,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.medInsuranceOrg", globalLang)}
                   value={formData.medInsuranceOrg}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, medInsuranceOrg: val }))}
@@ -1272,7 +1207,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.socialSupportCode", globalLang)}
                   value={formData.socialSupportCode}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, socialSupportCode: val }))}
@@ -1284,7 +1219,7 @@ export default function ProfileScreen() {
 
             <View style={styles.gridRow}>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.citizenship", globalLang)}
                   value={formData.citizenship}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, citizenship: val }))}
@@ -1293,7 +1228,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.documentType", globalLang)}
                   value={formData.documentType}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, documentType: val }))}
@@ -1302,7 +1237,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.documentSeries", globalLang)}
                   value={formData.documentSeries}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, documentSeries: val }))}
@@ -1314,7 +1249,7 @@ export default function ProfileScreen() {
 
             <View style={styles.gridRow}>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.documentNumber", globalLang)}
                   value={formData.documentNumber}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, documentNumber: val }))}
@@ -1330,7 +1265,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.departmentCode", globalLang)}
                   value={formData.departmentCode}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, departmentCode: val }))}
@@ -1342,7 +1277,7 @@ export default function ProfileScreen() {
 
             <View style={styles.gridRow}>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.documentIssuedBy", globalLang)}
                   value={formData.documentIssuedBy}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, documentIssuedBy: val }))}
@@ -1351,7 +1286,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.inn", globalLang)}
                   value={formData.inn}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, inn: val }))}
@@ -1393,7 +1328,7 @@ export default function ProfileScreen() {
               <View style={styles.fieldsBlock}>
             <View style={styles.gridRow}>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.addressType", globalLang)}
                   value={formData.addressType}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, addressType: val }))}
@@ -1402,7 +1337,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.region", globalLang)}
                   value={formData.region}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, region: val }))}
@@ -1411,7 +1346,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.district", globalLang)}
                   value={formData.district}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, district: val }))}
@@ -1423,7 +1358,7 @@ export default function ProfileScreen() {
 
             <View style={styles.gridRow}>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.city", globalLang)}
                   value={formData.city}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, city: val }))}
@@ -1432,7 +1367,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.settlement", globalLang)}
                   value={formData.settlement}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, settlement: val }))}
@@ -1441,7 +1376,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.street", globalLang)}
                   value={formData.street}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, street: val }))}
@@ -1453,7 +1388,7 @@ export default function ProfileScreen() {
 
             <View style={styles.gridRow}>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.house", globalLang)}
                   value={formData.house}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, house: val }))}
@@ -1462,7 +1397,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.terrain", globalLang)}
                   value={formData.terrain}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, terrain: val }))}
@@ -1471,7 +1406,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.apartment", globalLang)}
                   value={formData.apartment}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, apartment: val }))}
@@ -1483,7 +1418,7 @@ export default function ProfileScreen() {
 
             <View style={styles.gridRow}>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.postcode", globalLang)}
                   value={formData.postcode}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, postcode: val }))}
@@ -1492,7 +1427,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.geocoordinates", globalLang)}
                   value={formData.geocoordinates}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, geocoordinates: val }))}
@@ -1501,7 +1436,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.registrationChange", globalLang)}
                   value={formData.registrationChange}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, registrationChange: val }))}
@@ -1543,7 +1478,7 @@ export default function ProfileScreen() {
               <View style={styles.fieldsBlock}>
             <View style={styles.gridRow}>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.maritalStatus", globalLang)}
                   value={formData.maritalStatus}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, maritalStatus: val }))}
@@ -1552,7 +1487,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.education", globalLang)}
                   value={formData.education}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, education: val }))}
@@ -1561,7 +1496,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.employment", globalLang)}
                   value={formData.employment}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, employment: val }))}
@@ -1573,7 +1508,7 @@ export default function ProfileScreen() {
 
             <View style={styles.gridRow}>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.placeOfWork", globalLang)}
                   value={formData.placeOfWork}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, placeOfWork: val }))}
@@ -1582,7 +1517,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.workSpecialty", globalLang)}
                   value={formData.workSpecialty}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, workSpecialty: val }))}
@@ -1591,7 +1526,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.changePlaceOfWork", globalLang)}
                   value={formData.changePlaceOfWork}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, changePlaceOfWork: val }))}
@@ -1603,7 +1538,7 @@ export default function ProfileScreen() {
 
             <View style={styles.gridRow}>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.changeOfPosition", globalLang)}
                   value={formData.changeOfPosition}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, changeOfPosition: val }))}
@@ -1684,7 +1619,7 @@ export default function ProfileScreen() {
 
             <View style={styles.gridRow}>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.invalidGroup", globalLang)}
                   value={formData.invalidGroup}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, invalidGroup: val }))}
@@ -1693,7 +1628,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.disabilityType", globalLang)}
                   value={formData.disabilityType}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, disabilityType: val }))}
@@ -1702,7 +1637,7 @@ export default function ProfileScreen() {
                 />
               </View>
               <View style={styles.gridThird}>
-                <LocalFormInput
+                <AppInput
                   label={t("profile.disabilityPrimaryRepeated", globalLang)}
                   value={formData.disabilityPrimaryRepeated}
                   onChangeText={(val) => setFormData((prev) => ({ ...prev, disabilityPrimaryRepeated: val }))}
@@ -1775,7 +1710,7 @@ export default function ProfileScreen() {
 
                       <View style={styles.gridRow}>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.diseaseRecords.diagnosis", globalLang)}
                             value={record.diagnosis}
                             onChangeText={(val) => updateSubschemaField("diseases", index, "diagnosis", val)}
@@ -1784,7 +1719,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.diseaseRecords.icdCode", globalLang)}
                             value={record.icdCode}
                             onChangeText={(val) => updateSubschemaField("diseases", index, "icdCode", val)}
@@ -1793,7 +1728,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.diseaseRecords.doctor", globalLang)}
                             value={record.doctor}
                             onChangeText={(val) => updateSubschemaField("diseases", index, "doctor", val)}
@@ -1879,7 +1814,7 @@ export default function ProfileScreen() {
 
                       <View style={styles.gridRow}>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.finalDiagnosisRecords.diagnosis", globalLang)}
                             value={record.diagnosis}
                             onChangeText={(val) => updateSubschemaField("finalDiagnoses", index, "diagnosis", val)}
@@ -1888,7 +1823,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.finalDiagnosisRecords.icdCode", globalLang)}
                             value={record.icdCode}
                             onChangeText={(val) => updateSubschemaField("finalDiagnoses", index, "icdCode", val)}
@@ -1897,7 +1832,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.finalDiagnosisRecords.doctorName", globalLang)}
                             value={record.doctorName}
                             onChangeText={(val) => updateSubschemaField("finalDiagnoses", index, "doctorName", val)}
@@ -1909,7 +1844,7 @@ export default function ProfileScreen() {
 
                       <View style={styles.gridRow}>
                         <View style={styles.gridHalf}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.finalDiagnosisRecords.jobTitle", globalLang)}
                             value={record.jobTitle}
                             onChangeText={(val) => updateSubschemaField("finalDiagnoses", index, "jobTitle", val)}
@@ -1918,7 +1853,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridHalf}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.finalDiagnosisRecords.speciality", globalLang)}
                             value={record.speciality}
                             onChangeText={(val) => updateSubschemaField("finalDiagnoses", index, "speciality", val)}
@@ -1990,7 +1925,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridHalf}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.radiationDoseRecords.effectiveDose", globalLang)}
                             value={record.effectiveDose}
                             onChangeText={(val) => updateSubschemaField("radiationDoses", index, "effectiveDose", val)}
@@ -2002,7 +1937,7 @@ export default function ProfileScreen() {
 
                       <View style={styles.gridRow}>
                         <View style={styles.gridHalf}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.radiationDoseRecords.researchType", globalLang)}
                             value={record.researchType}
                             onChangeText={(val) => updateSubschemaField("radiationDoses", index, "researchType", val)}
@@ -2011,7 +1946,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridHalf}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.radiationDoseRecords.note", globalLang)}
                             value={record.note}
                             onChangeText={(val) => updateSubschemaField("radiationDoses", index, "note", val)}
@@ -2076,7 +2011,7 @@ export default function ProfileScreen() {
 
                       <View style={styles.gridRow}>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.lastName", globalLang)}
                             value={record.lastName}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "lastName", val)}
@@ -2085,7 +2020,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.firstName", globalLang)}
                             value={record.firstName}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "firstName", val)}
@@ -2094,7 +2029,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.middleName", globalLang)}
                             value={record.middleName}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "middleName", val)}
@@ -2136,7 +2071,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridHalf}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.relationship", globalLang)}
                             value={record.relationship}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "relationship", val)}
@@ -2148,7 +2083,7 @@ export default function ProfileScreen() {
 
                       <View style={styles.gridRow}>
                         <View style={styles.gridHalf}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.attitudeToPatient", globalLang)}
                             value={record.attitudeToPatient}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "attitudeToPatient", val)}
@@ -2157,7 +2092,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridHalf}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.documentOfAuthority", globalLang)}
                             value={record.documentOfAuthority}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "documentOfAuthority", val)}
@@ -2169,7 +2104,7 @@ export default function ProfileScreen() {
 
                       <View style={styles.gridRow}>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.documentType", globalLang)}
                             value={record.documentType}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "documentType", val)}
@@ -2178,7 +2113,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.series", globalLang)}
                             value={record.series}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "series", val)}
@@ -2187,7 +2122,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.number", globalLang)}
                             value={record.number}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "number", val)}
@@ -2206,7 +2141,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.issuedBy", globalLang)}
                             value={record.issuedBy}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "issuedBy", val)}
@@ -2215,7 +2150,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.snils", globalLang)}
                             value={record.snils}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "snils", val)}
@@ -2227,7 +2162,7 @@ export default function ProfileScreen() {
 
                       <View style={styles.gridRow}>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.addressType", globalLang)}
                             value={record.addressType}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "addressType", val)}
@@ -2236,7 +2171,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.address", globalLang)}
                             value={record.address}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "address", val)}
@@ -2245,7 +2180,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.tenant", globalLang)}
                             value={record.tenant}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "tenant", val)}
@@ -2257,7 +2192,7 @@ export default function ProfileScreen() {
 
                       <View style={styles.gridRow}>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.subjectOfRussia", globalLang)}
                             value={record.subjectOfRussia}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "subjectOfRussia", val)}
@@ -2266,7 +2201,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.district", globalLang)}
                             value={record.district}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "district", val)}
@@ -2275,7 +2210,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.city", globalLang)}
                             value={record.city}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "city", val)}
@@ -2287,7 +2222,7 @@ export default function ProfileScreen() {
 
                       <View style={styles.gridRow}>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.settlement", globalLang)}
                             value={record.settlement}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "settlement", val)}
@@ -2296,7 +2231,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.street", globalLang)}
                             value={record.street}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "street", val)}
@@ -2305,7 +2240,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridThird}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.house", globalLang)}
                             value={record.house}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "house", val)}
@@ -2317,7 +2252,7 @@ export default function ProfileScreen() {
 
                       <View style={styles.gridRow}>
                         <View style={styles.gridHalf}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.apartment", globalLang)}
                             value={record.apartment}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "apartment", val)}
@@ -2326,7 +2261,7 @@ export default function ProfileScreen() {
                           />
                         </View>
                         <View style={styles.gridHalf}>
-                          <LocalFormInput
+                          <AppInput
                             label={t("profile.legalRepresentatives.state", globalLang)}
                             value={record.state}
                             onChangeText={(val) => updateSubschemaField("legalRepresentatives", index, "state", val)}
@@ -2376,7 +2311,7 @@ export default function ProfileScreen() {
               <View style={styles.fieldsBlock}>
                 <View style={styles.gridRow}>
                   <View style={{ width: "100%", gap: 12 }}>
-                    <LocalFormInput
+                    <AppInput
                       label={t("profile.notes", globalLang)}
                       value={formData.notes}
                       onChangeText={(val) => setFormData((prev) => ({ ...prev, notes: val }))}
@@ -2384,7 +2319,7 @@ export default function ProfileScreen() {
                       leftIcon="file-text"
                       multiline
                     />
-                    <LocalFormInput
+                    <AppInput
                       label={t("profile.comments", globalLang)}
                       value={formData.comments}
                       onChangeText={(val) => setFormData((prev) => ({ ...prev, comments: val }))}
@@ -2581,11 +2516,13 @@ const styles = StyleSheet.create({
       web: {
         boxShadow: "0 12px 24px rgba(15, 76, 129, 0.08)",
       },
-      default: {
+      ios: {
         shadowColor: "#0F4C81",
         shadowOpacity: 0.08,
         shadowRadius: 12,
         shadowOffset: { width: 0, height: 6 },
+      },
+      android: {
         elevation: 2,
       },
     }),
@@ -2763,11 +2700,13 @@ const styles = StyleSheet.create({
       web: {
         boxShadow: "0 2px 8px rgba(15, 76, 129, 0.06)",
       },
-      default: {
+      ios: {
         shadowColor: "#0F4C81",
         shadowOpacity: 0.06,
         shadowRadius: 4,
         shadowOffset: { width: 0, height: 2 },
+      },
+      android: {
         elevation: 2,
       },
     }),
@@ -2823,11 +2762,13 @@ const styles = StyleSheet.create({
       web: {
         boxShadow: "0 10px 24px rgba(0, 123, 255, 0.22)",
       },
-      default: {
+      ios: {
         shadowColor: "#007bff",
         shadowOpacity: 0.22,
         shadowRadius: 10,
         shadowOffset: { width: 0, height: 5 },
+      },
+      android: {
         elevation: 4,
       },
     }),
@@ -2849,8 +2790,10 @@ const styles = StyleSheet.create({
       web: {
         boxShadow: "none",
       },
-      default: {
+      ios: {
         shadowColor: "transparent",
+      },
+      android: {
         elevation: 0,
       },
     }),
@@ -2878,11 +2821,13 @@ const styles = StyleSheet.create({
       web: {
         boxShadow: "0 24px 60px rgba(9, 13, 22, 0.24)",
       },
-      default: {
+      ios: {
         shadowColor: "#0F4C81",
         shadowOpacity: 0.18,
         shadowRadius: 24,
         shadowOffset: { width: 0, height: 12 },
+      },
+      android: {
         elevation: 8,
       },
     }),

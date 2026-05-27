@@ -1,4 +1,4 @@
-import { Image, Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { Image, Platform, Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
 import { colors } from "@/theme/colors";
@@ -116,11 +116,20 @@ const styles = StyleSheet.create({
     borderColor: "rgba(0, 40, 92, 0.08)",
     padding: spacing.lg,
     gap: spacing.md,
-    shadowColor: "#00285c",
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 3,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#00285c",
+        shadowOpacity: 0.08,
+        shadowRadius: 24,
+        shadowOffset: { width: 0, height: 10 },
+      },
+      android: {
+        elevation: 3,
+      },
+      web: {
+        boxShadow: "0 10px 24px rgba(0, 40, 92, 0.08)",
+      },
+    }),
   },
   title: {
     color: "#10233F",
@@ -169,11 +178,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#00285c",
-    shadowColor: "#00285c",
-    shadowOpacity: 0.18,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 4,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#00285c",
+        shadowOpacity: 0.18,
+        shadowRadius: 12,
+        shadowOffset: { width: 0, height: 8 },
+      },
+      android: {
+        elevation: 4,
+      },
+      web: {
+        boxShadow: "0 8px 12px rgba(0, 40, 92, 0.18)",
+      },
+    }),
   },
   primaryButtonText: {
     color: "#FFFFFF",

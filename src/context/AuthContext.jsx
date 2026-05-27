@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const applyAuthResponse = async (response) => {
+  const applyAuthResponse = useCallback(async (response) => {
     if (response?.accessToken && response?.user) {
       setUser(response.user);
       setAccessToken(response.accessToken);
@@ -45,37 +45,37 @@ export const AuthProvider = ({ children }) => {
       await sessionStorage.saveAccessToken(response.accessToken);
       await sessionStorage.saveRefreshToken(response.refreshToken ?? null);
     }
-  };
+  }, []);
 
-  const signIn = async (email, password, language = "en") => {
+  const signIn = useCallback(async (email, password, language = "en") => {
     const devInfo = await buildDeviceInfo();
     const response = await authService.signIn(email, password, devInfo, language);
     await applyAuthResponse(response);
     return response;
-  };
+  }, [applyAuthResponse]);
 
-  const signUp = async (email, password, language = "en") => {
+  const signUp = useCallback(async (email, password, language = "en") => {
     const response = await authService.signUp(email, password, language);
     return response;
-  };
+  }, []);
 
-  const sendOtp = async (phoneNumber) => {
+  const sendOtp = useCallback(async (phoneNumber) => {
     return await authService.sendOtp(phoneNumber);
-  };
+  }, []);
 
-  const verifyOtpSignIn = async (phoneNumber, otp, language = "en") => {
+  const verifyOtpSignIn = useCallback(async (phoneNumber, otp, language = "en") => {
     const devInfo = await buildDeviceInfo();
     const response = await authService.verifyOtp(phoneNumber, otp, devInfo, language);
     await applyAuthResponse(response);
     return response;
-  };
+  }, [applyAuthResponse]);
 
-  const verifyOtpSignUp = async (phoneNumber, otp, language = "en") => {
+  const verifyOtpSignUp = useCallback(async (phoneNumber, otp, language = "en") => {
     const devInfo = await buildDeviceInfo();
     const response = await authService.signupOtp(phoneNumber, otp, devInfo, language);
     await applyAuthResponse(response);
     return response;
-  };
+  }, [applyAuthResponse]);
 
   const signOut = useCallback(async () => {
     try {
@@ -83,8 +83,8 @@ export const AuthProvider = ({ children }) => {
       if (rt) {
         await authService.signOut(rt);
       }
-    } catch (err) {
-      console.warn("Sign out API call error:", err);
+    } catch {
+      // Ignore API call error during signout and proceed with clearing session
     } finally {
       await sessionStorage.clear();
       setUser(null);
@@ -92,9 +92,9 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const sendPasswordResetEmail = async (email, language = "en") => {
+  const sendPasswordResetEmail = useCallback(async (email, language = "en") => {
     return await authService.forgotPassword(email, language);
-  };
+  }, []);
 
   const syncPatientProfile = useCallback(async (profileData) => {
     setUser((prev) => {
@@ -134,7 +134,23 @@ export const AuthProvider = ({ children }) => {
       updateToken,
       changeLanguage,
     }),
-    [accessToken, hydrateSession, isBootstrapping, user, signOut, syncPatientProfile, updateToken, language, changeLanguage],
+    [
+      accessToken,
+      hydrateSession,
+      isBootstrapping,
+      user,
+      signOut,
+      syncPatientProfile,
+      updateToken,
+      language,
+      changeLanguage,
+      signIn,
+      signUp,
+      sendOtp,
+      verifyOtpSignIn,
+      verifyOtpSignUp,
+      sendPasswordResetEmail,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

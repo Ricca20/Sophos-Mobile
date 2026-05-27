@@ -3,11 +3,11 @@ import {
   Alert,
   Image,
   ImageBackground,
+  Platform,
   Pressable,
   SafeAreaView,
   StyleSheet,
   Text,
-  TextInput,
   View,
   ActivityIndicator,
   ScrollView,
@@ -16,77 +16,11 @@ import { Link, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/hooks/useAuth";
-import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { t } from "@/utils/i18n";
 import { PhoneInput } from "@/components/PhoneInput";
+import { AppInput } from "@/components/AppInput";
 
-// Form Input Component with Focus States
-const FormInput = ({
-  label,
-  value,
-  onChangeText,
-  placeholder,
-  secureTextEntry,
-  keyboardType,
-  leftIcon,
-  rightIcon,
-  onRightIconPress,
-  error,
-}) => {
-  const [isFocused, setIsFocused] = useState(false);
-
-  return (
-    <View style={styles.inputContainer}>
-      <Text style={[styles.inputLabel, isFocused && styles.inputLabelFocused, error && styles.inputLabelError]}>
-        {label}
-      </Text>
-      <View
-        style={[
-          styles.inputWrapper,
-          isFocused && styles.inputWrapperFocused,
-          error && styles.inputWrapperError,
-        ]}
-      >
-        {leftIcon && (
-          <Feather
-            name={leftIcon}
-            size={18}
-            color={error ? "#EF4444" : isFocused ? "#0F4C81" : "#6B7A90"}
-            style={styles.inputLeftIcon}
-            pointerEvents="none"
-          />
-        )}
-        <TextInput
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor="#94A3B8"
-          secureTextEntry={secureTextEntry}
-          keyboardType={keyboardType}
-          autoCapitalize="none"
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          style={[
-            styles.inputField,
-            leftIcon ? { paddingLeft: 44 } : null,
-            rightIcon ? { paddingRight: 44 } : null,
-          ]}
-        />
-        {rightIcon && (
-          <Pressable onPress={onRightIconPress} style={styles.inputRightIcon}>
-            <Feather
-              name={rightIcon}
-              size={18}
-              color={isFocused ? "#0F4C81" : "#6B7A90"}
-            />
-          </Pressable>
-        )}
-      </View>
-      {error ? <Text style={styles.inputErrorText}>{error}</Text> : null}
-    </View>
-  );
-};
 
 export default function SignInScreen() {
   const router = useRouter();
@@ -141,7 +75,6 @@ export default function SignInScreen() {
       await signIn(email.trim().toLowerCase(), password, lang);
       router.replace("/home");
     } catch (error) {
-      console.warn("Sign In Error:", error);
       const isInvalid = error?.response?.status === 401;
       Alert.alert(
         t("signin.errors.login", lang), 
@@ -214,7 +147,7 @@ export default function SignInScreen() {
       resizeMode="cover"
     >
       <StatusBar style="light" />
-      <View style={styles.overlay} pointerEvents="none" />
+      <View style={[styles.overlay, { pointerEvents: "none" }]} />
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="always" keyboardDismissMode="none">
           {/* Language Selector */}
@@ -277,7 +210,7 @@ export default function SignInScreen() {
               {/* Email Form */}
               {activeTab === "email" ? (
                 <View style={styles.form}>
-                  <FormInput
+                  <AppInput
                     label={t("signin.emailLabel", lang)}
                     value={email}
                     onChangeText={handleEmailChange}
@@ -287,7 +220,7 @@ export default function SignInScreen() {
                     error={emailError}
                   />
 
-                  <FormInput
+                  <AppInput
                     label={t("signin.passwordLabel", lang)}
                     value={password}
                     onChangeText={setPassword}
@@ -380,7 +313,7 @@ export default function SignInScreen() {
                     </Pressable>
                   ) : (
                     <View style={{ gap: spacing.md }}>
-                      <FormInput
+                      <AppInput
                         label={t("signin.otp.otpLabel", lang)}
                         value={otpCode}
                         onChangeText={(val) => {
@@ -528,11 +461,20 @@ const styles = StyleSheet.create({
     padding: 28,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.7)",
-    shadowColor: "#0F4C81",
-    shadowOpacity: 0.15,
-    shadowRadius: 25,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#0F4C81",
+        shadowOpacity: 0.15,
+        shadowRadius: 25,
+        shadowOffset: { width: 0, height: 10 },
+      },
+      android: {
+        elevation: 8,
+      },
+      web: {
+        boxShadow: "0 10px 25px rgba(15, 76, 129, 0.15)",
+      },
+    }),
   },
   tabToggleContainer: {
     alignItems: "center",
@@ -554,11 +496,20 @@ const styles = StyleSheet.create({
   },
   tabButtonActive: {
     backgroundColor: "#FFFFFF",
-    shadowColor: "#0F4C81",
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 3,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#0F4C81",
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 3 },
+      },
+      android: {
+        elevation: 3,
+      },
+      web: {
+        boxShadow: "0 3px 6px rgba(15, 76, 129, 0.08)",
+      },
+    }),
   },
   tabButtonText: {
     fontSize: 13,
@@ -589,73 +540,6 @@ const styles = StyleSheet.create({
   form: {
     gap: 18,
   },
-  inputContainer: {
-    gap: 6,
-  },
-  inputLabel: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: "#475569",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    paddingLeft: 2,
-  },
-  inputLabelFocused: {
-    color: "#0F4C81",
-  },
-  inputLabelError: {
-    color: "#EF4444",
-  },
-  inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1.5,
-    borderColor: "#E2E8F0",
-    borderRadius: 18,
-    height: 54,
-    position: "relative",
-    shadowColor: "transparent",
-  },
-  inputWrapperFocused: {
-    borderColor: "#0F4C81",
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#0F4C81",
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
-  },
-  inputWrapperError: {
-    borderColor: "#EF4444",
-    backgroundColor: "#FFF5F5",
-  },
-  inputLeftIcon: {
-    position: "absolute",
-    left: 16,
-    zIndex: 1,
-  },
-  inputRightIcon: {
-    position: "absolute",
-    right: 16,
-    zIndex: 1,
-    padding: 4,
-  },
-  inputField: {
-    flex: 1,
-    height: "100%",
-    fontSize: 14,
-    color: "#10233F",
-    paddingHorizontal: 18,
-    fontWeight: "600",
-  },
-  inputErrorText: {
-    fontSize: 11,
-    color: "#EF4444",
-    fontWeight: "700",
-    marginTop: 2,
-    paddingLeft: 4,
-  },
   rowBetween: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -684,11 +568,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: 10,
-    shadowColor: "#0F4C81",
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#0F4C81",
+        shadowOpacity: 0.25,
+        shadowRadius: 12,
+        shadowOffset: { width: 0, height: 6 },
+      },
+      android: {
+        elevation: 4,
+      },
+      web: {
+        boxShadow: "0 6px 12px rgba(15, 76, 129, 0.25)",
+      },
+    }),
   },
   primaryButtonText: {
     color: "#FFFFFF",
@@ -698,8 +591,17 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     backgroundColor: "#94A3B8",
-    shadowColor: "transparent",
-    elevation: 0,
+    ...Platform.select({
+      ios: {
+        shadowColor: "transparent",
+      },
+      android: {
+        elevation: 0,
+      },
+      web: {
+        boxShadow: "none",
+      },
+    }),
   },
   buttonWithIcon: {
     flexDirection: "row",

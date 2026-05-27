@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
-import { Animated, Image, StyleSheet, View } from "react-native";
+import { Animated, Image, Platform, StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 
 export const LoadingScreen = () => {
-  const pulse = useRef(new Animated.Value(0.92)).current;
+  const pulse = useRef(new Animated.Value(0.97)).current;
   const floatY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -11,13 +11,13 @@ export const LoadingScreen = () => {
       Animated.sequence([
         Animated.timing(pulse, {
           toValue: 1,
-          duration: 700,
-          useNativeDriver: true,
+          duration: 1800,
+          useNativeDriver: Platform.OS !== "web",
         }),
         Animated.timing(pulse, {
-          toValue: 0.92,
-          duration: 700,
-          useNativeDriver: true,
+          toValue: 0.97,
+          duration: 1800,
+          useNativeDriver: Platform.OS !== "web",
         }),
       ])
     );
@@ -25,14 +25,14 @@ export const LoadingScreen = () => {
     const floatAnimation = Animated.loop(
       Animated.sequence([
         Animated.timing(floatY, {
-          toValue: -8,
-          duration: 1100,
-          useNativeDriver: true,
+          toValue: -3,
+          duration: 2400,
+          useNativeDriver: Platform.OS !== "web",
         }),
         Animated.timing(floatY, {
           toValue: 0,
-          duration: 1100,
-          useNativeDriver: true,
+          duration: 2400,
+          useNativeDriver: Platform.OS !== "web",
         }),
       ])
     );
